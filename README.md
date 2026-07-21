@@ -21,6 +21,23 @@ python3 download_pins.py
 Images are written to `downloads/<board name>/<pin id>.jpg`. Re-running skips
 files that already exist, so an interrupted run simply resumes.
 
+## Landing page
+
+`index.html` is an unrelated static page — the *trip dancer* landing page —
+served from this repo via GitHub Pages. It is self-contained: no build step, no
+framework, no external requests except the Google Fonts stylesheet.
+
+Its images live in `assets/` as WebP, converted from the originals in
+`webpage-assets/` (kept out of git — see `.gitignore`). To regenerate them:
+
+```bash
+cwebp -q 90 -resize 2400 0 webpage-assets/<hero>.png -o assets/desert-organ-city.webp
+cwebp -q 82 -alpha_q 90 webpage-assets/<cutout>.png  -o assets/<name>.webp
+```
+
+The `og:image` meta tag holds an absolute URL; update it if the site moves to a
+custom domain.
+
 ## Notes
 
 - Secret boards additionally require the `boards:read_secret` and

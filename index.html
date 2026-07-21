@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>trip dancer — somewhere past the last named place</title>
+<meta name="description" content="Somewhere past the last named place, an organ is breathing. A cryptic desert.">
+<meta name="theme-color" content="#14100b">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="trip dancer.">
+<meta property="og:description" content="Somewhere past the last named place, an organ is breathing.">
+<!-- Open Graph scrapers need an absolute URL; update the host if this moves to a custom domain. -->
+<meta property="og:image" content="https://vladyslavbezdolnyi.github.io/alcadia/assets/desert-organ-city.webp">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/desert-organ-city.webp">
+
+<style>
+:root {
+  --ink:        #14100b;
+  --sand:       #cdbb92;
+  --sand-bright:#e8d7ac;
+  --sand-body:  #d3c29a;
+  --gold:       #c9b483;
+  --display: 'IM Fell English', Georgia, serif;
+  --body:    'EB Garamond', Georgia, serif;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+}
+
+html, body { margin: 0; padding: 0; background: var(--ink); }
+body {
+  overflow-x: hidden;
+  color: var(--sand);
+  font-family: var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+*, *::before, *::after { box-sizing: border-box; }
+img { max-width: 100%; }
+::selection { background: rgba(201, 180, 131, .25); }
+
+a {
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201, 180, 131, .35);
+  transition: color .4s, border-color .4s;
+}
+a:hover { color: #f0e3bd; border-bottom-color: rgba(240, 227, 189, .8); }
+
+@keyframes riseIn  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes breathe { 0%, 100% { opacity: .35; } 50% { opacity: .75; } }
+
+/* ---------- sandwind canvas ---------- */
+
+#sandwind {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 620px;
+  overflow: hidden;
+}
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('assets/desert-organ-city.webp');
+  background-size: cover;
+  background-position: center 30%;
+  will-change: transform;
+}
+.hero__veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(20, 16, 11, .30) 0%,
+    rgba(20, 16, 11, 0)   30%,
+    rgba(20, 16, 11, .05) 60%,
+    rgba(20, 16, 11, .82) 88%,
+    var(--ink)            100%);
+}
+.hero__copy {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 24px 11vh;
+  text-align: center;
+  will-change: transform, opacity;
+}
+.hero__eyebrow {
+  font-size: 14px;
+  letter-spacing: .42em;
+  text-transform: uppercase;
+  color: rgba(205, 187, 146, .75);
+  animation: riseIn 1.6s ease both;
+}
+.hero__title {
+  margin: 18px 0 14px;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(56px, 9vw, 124px);
+  line-height: 1;
+  color: var(--sand-bright);
+  text-shadow: 0 2px 40px rgba(0, 0, 0, .55);
+  animation: riseIn 1.6s ease .25s both;
+}
+.hero__sub {
+  font-style: italic;
+  font-size: clamp(17px, 1.6vw, 22px);
+  color: rgba(205, 187, 146, .85);
+  animation: riseIn 1.6s ease .5s both;
+}
+.hero__scroll {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: breathe 4s ease-in-out infinite;
+}
+.hero__scroll span {
+  font-size: 11px;
+  letter-spacing: .4em;
+  text-transform: uppercase;
+  color: rgba(205, 187, 146, .7);
+}
+.hero__scroll i {
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(180deg, rgba(205, 187, 146, .7), rgba(205, 187, 146, 0));
+}
+
+/* ---------- scroll reveal ---------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  filter: blur(6px);
+  transition: opacity 1.4s ease, transform 1.4s ease, filter 1.4s ease;
+}
+.reveal.is-visible { opacity: 1; transform: none; filter: none; }
+
+/* Each revealed child animates in from its own `--from` transform. */
+.reveal [data-reveal-item] {
+  opacity: 0;
+  transform: var(--from, translateY(36px));
+}
+.reveal.is-visible [data-reveal-item] { opacity: 1; transform: none; }
+
+/* ---------- verses ---------- */
+
+.verses {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Figures enter from ±80px, which pokes past a narrow viewport. Clip rather
+     than rely on body's overflow-x, which iOS Safari has been known to ignore.
+     `clip` (not `hidden`) leaves the vertical axis a non-scrolling `visible`. */
+  overflow-x: clip;
+}
+
+.verse {
+  min-height: 72vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  max-width: 1040px;
+  padding: 60px 28px;
+  text-align: center;
+}
+
+.verse__figure {
+  height: auto;
+  transition: opacity 1.6s ease .25s, transform 1.6s var(--ease-out) .25s;
+  filter: sepia(.5) saturate(.65) brightness(.88);
+  -webkit-mask-image: linear-gradient(180deg, #000 76%, transparent 100%);
+          mask-image: linear-gradient(180deg, #000 76%, transparent 100%);
+}
+.verse__text {
+  transition: opacity 1.4s ease .55s, transform 1.4s var(--ease-out) .55s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+  flex: 1 1 360px;
+  max-width: 520px;
+}
+.verse__numeral {
+  font-family: var(--display);
+  font-size: 15px;
+  letter-spacing: .5em;
+  color: rgba(205, 187, 146, .55);
+}
+.verse__line {
+  margin: 0;
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.85;
+  color: var(--sand-body);
+  text-wrap: pretty;
+}
+
+/* Per-verse entrances — the figure swings in from the side it sits on. */
+.fig--i    { --from: translateX(-80px) rotate(-2deg);          width: min(320px, 64vw); }
+.fig--ii   { --from: translateX(80px) rotate(3deg) scale(.94); width: min(380px, 70vw); }
+.fig--iii  { --from: translateX(-80px) translateY(30px);       width: min(320px, 64vw);
+             filter: sepia(.35) saturate(.7) brightness(.85); }
+.fig--iv   { --from: translateX(80px) translateY(40px);        width: min(380px, 70vw); }
+
+/* Even verses put the figure on the right without reordering the DOM. */
+.verse--mirrored .verse__figure { order: 2; }
+.verse--mirrored .verse__text   { order: 1; }
+
+/* ---------- door ---------- */
+
+.door {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  max-width: 640px;
+  padding: 60px 28px;
+  text-align: center;
+}
+.door__figure {
+  --from: translateY(70px) scale(.93);
+  width: min(400px, 74vw);
+  height: auto;
+  transition: opacity 1.8s ease .2s, transform 1.8s var(--ease-out) .2s;
+  filter: sepia(.5) saturate(.65) brightness(.88);
+  -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+          mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+}
+.door__line {
+  --from: translateY(30px);
+  transition: opacity 1.4s ease .6s, transform 1.4s var(--ease-out) .6s;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(26px, 3vw, 38px);
+  color: var(--sand-bright);
+  line-height: 1.5;
+}
+.door__cta {
+  --from: translateY(30px);
+  transition: opacity 1.4s ease .9s, transform 1.4s var(--ease-out) .9s, color .4s, border-color .4s;
+  font-family: var(--display);
+  font-size: clamp(18px, 1.8vw, 24px);
+  letter-spacing: .12em;
+  padding-bottom: 4px;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(201, 180, 131, .35);
+}
+
+.colophon {
+  padding: 0 24px 56px;
+  text-align: center;
+  font-size: 14px;
+  font-style: italic;
+  color: rgba(205, 187, 146, .45);
+}
+
+/* ---------- narrow viewports ---------- */
+
+@media (max-width: 600px) {
+  /* The subtitle wraps to two lines on a phone and crowds the scroll cue.
+     Shrink the cue rather than raise the copy — the copy needs to stay low,
+     where the veil is dark enough to read against. */
+  .hero__scroll { bottom: 16px; gap: 6px; }
+  .hero__scroll i { height: 26px; }
+  .hero__eyebrow { font-size: 12px; letter-spacing: .32em; }
+  .verse, .door { gap: 36px; }
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  #sandwind { display: none; }
+  .reveal, .reveal [data-reveal-item] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .hero__eyebrow, .hero__title, .hero__sub, .hero__scroll { animation: none; opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="sandwind" aria-hidden="true"></canvas>
+
+<header class="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__veil"></div>
+  <div class="hero__copy">
+    <div class="hero__eyebrow">the dust arrives before the traveler</div>
+    <h1 class="hero__title">trip dancer.</h1>
+    <div class="hero__sub">somewhere past the last named place, an organ is breathing.</div>
+  </div>
+  <div class="hero__scroll" aria-hidden="true">
+    <span>listen</span>
+    <i></i>
+  </div>
+</header>
+
+<main class="verses">
+
+  <section class="verse reveal">
+    <img class="verse__figure fig--i" data-reveal-item src="assets/masked-hooded-elf.webp" alt="" loading="lazy" width="651" height="768">
+    <div class="verse__text" data-reveal-item>
+      <div class="verse__numeral">i.</div>
+      <p class="verse__line">There is a music that was never written. It is played each night on pipes taller than prayer, for an audience that never blinks.</p>
+    </div>
+  </section>
+
+  <section class="verse verse--mirrored reveal">
+    <img class="verse__figure fig--ii" data-reveal-item src="assets/horned-star-duelist.webp" alt="" loading="lazy" width="715" height="789">
+    <div class="verse__text" data-reveal-item>
+      <div class="verse__numeral">ii.</div>
+      <p class="verse__line">The dancers come in with the dust. No one remembers inviting them. No one has ever asked them to stop.</p>
+    </div>
+  </section>
+
+  <section class="verse reveal">
+    <img class="verse__figure fig--iii" data-reveal-item src="assets/raven-winged-woman.webp" alt="" loading="lazy" width="624" height="827">
+    <div class="verse__text" data-reveal-item>
+      <div class="verse__numeral">iii.</div>
+      <p class="verse__line">Something watches from above the pipes. Some say the city grew around its gaze, the way a pearl grows around a wound.</p>
+    </div>
+  </section>
+
+  <section class="verse verse--mirrored reveal">
+    <img class="verse__figure fig--iv" data-reveal-item src="assets/red-striped-elf.webp" alt="" loading="lazy" width="736" height="890">
+    <div class="verse__text" data-reveal-item>
+      <div class="verse__numeral">iv.</div>
+      <p class="verse__line">The pale ones deal only in questions. Answer one, and you will owe another. No one has ever settled the debt.</p>
+    </div>
+  </section>
+
+  <section class="door reveal">
+    <img class="door__figure" data-reveal-item src="assets/bone-throne-queen.webp" alt="" loading="lazy" width="800" height="991">
+    <div class="door__line" data-reveal-item>The door was never locked.</div>
+    <!-- Placeholder, not yet a link. When there is somewhere to go, swap this
+         <div> for <a href="…"> — .door__cta already carries the link styling. -->
+    <div class="door__cta" data-reveal-item>step into the dust</div>
+  </section>
+
+  <footer class="colophon reveal">what you find here, you brought with you.</footer>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /* ---------------------------------------------------------------
+     Scroll reveal. Sections fade up out of blur; their children
+     drift in from whatever `--from` transform the stylesheet gives them.
+     --------------------------------------------------------------- */
+
+  var sections = document.querySelectorAll('.reveal');
+
+  if (!('IntersectionObserver' in window) || reduced.matches) {
+    Array.prototype.forEach.call(sections, function (el) { el.classList.add('is-visible'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        io.unobserve(entry.target);
+      });
+    }, { threshold: 0.25 });
+
+    Array.prototype.forEach.call(sections, function (el) { io.observe(el); });
+  }
+
+  if (reduced.matches) return;
+
+  /* ---------------------------------------------------------------
+     Hero parallax. The background drifts slower than the page and the
+     title fades out over the first half-screen of scroll.
+     --------------------------------------------------------------- */
+
+  var heroBg   = document.querySelector('.hero__bg');
+  var heroCopy = document.querySelector('.hero__copy');
+  var parallaxQueued = false;
+
+  function paintParallax() {
+    parallaxQueued = false;
+    var y = window.pageYOffset;
+    heroBg.style.transform = 'translateY(' + (y * .28) + 'px) scale(' + (1 + y * .00012) + ')';
+    heroCopy.style.opacity = Math.max(0, 1 - y / (window.innerHeight * .55));
+    heroCopy.style.transform = 'translateY(' + (y * .12) + 'px)';
+  }
+
+  window.addEventListener('scroll', function () {
+    if (parallaxQueued) return;
+    parallaxQueued = true;
+    requestAnimationFrame(paintParallax);
+  }, { passive: true });
+
+  /* ---------------------------------------------------------------
+     Sandwind. Grains are blown left-to-right by a wind built from two
+     out-of-phase sines, and shoved around by the cursor. Each grain is
+     drawn as a short streak along its own velocity vector.
+     --------------------------------------------------------------- */
+
+  var canvas = document.getElementById('sandwind');
+  var ctx = canvas.getContext('2d');
+
+  var WIND   = 1.3;   // gust strength
+  var FORCE  = 1;     // how hard the cursor pushes
+  var RADIUS = 190;   // cursor influence, in CSS px
+
+  var W = 0, H = 0, dpr = 1, grainTarget = 0;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.width  = window.innerWidth  * dpr;
+    H = canvas.height = window.innerHeight * dpr;
+    canvas.style.width  = window.innerWidth  + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    // Phones get a thinner storm — 2000 streaks a frame is a battery fire.
+    grainTarget = window.innerWidth < 768 ? 900 : 2000;
+  }
+  resize();
+
+  function spawn() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: 0, vy: 0,
+      s:  .4  + Math.random() * 1.5,          // streak weight
+      a:  .06 + Math.random() * .3,           // opacity
+      ph: Math.random() * Math.PI * 2,        // gust phase offset
+      sp: .5  + Math.random()                 // how much wind it catches
+    };
+  }
+
+  var grains = [];
+  var mx = -1e4, my = -1e4, pmx = -1e4, pmy = -1e4, mvx = 0, mvy = 0;
+
+  function onMove(e) {
+    mx = e.clientX * dpr;
+    my = e.clientY * dpr;
+    if (pmx < -9e3) { pmx = mx; pmy = my; }
+  }
+  function onTouch(e) { if (e.touches[0]) onMove(e.touches[0]); }
+
+  window.addEventListener('mousemove', onMove, { passive: true });
+  window.addEventListener('touchmove', onTouch, { passive: true });
+  window.addEventListener('resize', resize);
+
+  var t = 0;
+
+  function frame() {
+    requestAnimationFrame(frame);
+
+    while (grains.length < grainTarget) grains.push(spawn());
+    if (grains.length > grainTarget) grains.length = grainTarget;
+
+    // Smoothed cursor velocity — the shove follows the gesture, not the jitter.
+    mvx += (mx - pmx - mvx) * .25;
+    mvy += (my - pmy - mvy) * .25;
+    pmx = mx; pmy = my;
+    var mSpeed = Math.hypot(mvx, mvy);
+
+    t += .016;
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineCap = 'round';
+
+    var R = RADIUS * dpr;
+
+    for (var i = 0; i < grains.length; i++) {
+      var p = grains[i];
+
+      var gust = Math.sin(t * .5 + p.ph) + Math.sin(t * .17 + p.y * .002) * .6;
+      var wx = (1.3 + gust * .8) * WIND * p.sp * dpr;
+      var wy = (Math.sin(t * .8 + p.ph * 2) * .35 + Math.cos(p.x * .0012 + t * .3) * .2) * WIND * dpr;
+
+      p.vx += (wx - p.vx) * .045;
+      p.vy += (wy - p.vy) * .045;
+
+      var dx = p.x - mx, dy = p.y - my, d2 = dx * dx + dy * dy;
+      if (d2 < R * R) {
+        var d = Math.sqrt(d2) || 1, k = 1 - d / R;
+        // Push away from the cursor, plus a perpendicular curl so it swirls.
+        p.vx += (mvx * .14 + (dx / d) * mSpeed * .05 + (-dy / d) * mSpeed * .04) * k * FORCE;
+        p.vy += (mvy * .14 + (dy / d) * mSpeed * .05 + ( dx / d) * mSpeed * .04) * k * FORCE;
+      }
+
+      var v = Math.hypot(p.vx, p.vy), vmax = 22 * dpr;
+      if (v > vmax) { p.vx *= vmax / v; p.vy *= vmax / v; }
+
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x > W + 20)      { p.x = -20;    p.y = Math.random() * H; }
+      else if (p.x < -20)    { p.x = W + 20; p.y = Math.random() * H; }
+      if (p.y > H + 20)      { p.y = -20; }
+      else if (p.y < -20)    { p.y = H + 20; }
+
+      var len = Math.max(1, Math.min(v * 3.2, 34 * dpr));
+      var nx = v > .01 ? p.vx / v : 1;
+      var ny = v > .01 ? p.vy / v : 0;
+
+      ctx.strokeStyle = 'rgba(216,194,148,' + Math.min(.5, p.a * (0.7 + v * .08)) + ')';
+      ctx.lineWidth = p.s * dpr * .75;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x - nx * len, p.y - ny * len);
+      ctx.stroke();
+    }
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
