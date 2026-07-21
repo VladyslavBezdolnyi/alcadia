@@ -72,13 +72,17 @@ a:hover { color: #f0e3bd; border-bottom-color: rgba(240, 227, 189, .8); }
   min-height: 620px;
   overflow: hidden;
 }
+/* A real <img>, not a CSS background. Safari fails to paint a large
+   background-image on a compositor-promoted layer, which left the hero blank
+   while the five <img> cutouts below rendered fine. An <img> also gets a
+   higher default fetch priority, which matters for the LCP element. */
 .hero__bg {
   position: absolute;
   inset: 0;
-  background-image: url('assets/desert-organ-city.webp');
-  background-size: cover;
-  background-position: center 30%;
-  will-change: transform;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
 }
 .hero__veil {
   position: absolute;
@@ -100,7 +104,6 @@ a:hover { color: #f0e3bd; border-bottom-color: rgba(240, 227, 189, .8); }
   justify-content: flex-end;
   padding: 0 24px 11vh;
   text-align: center;
-  will-change: transform, opacity;
 }
 .hero__eyebrow {
   font-size: 14px;
@@ -314,7 +317,8 @@ a:hover { color: #f0e3bd; border-bottom-color: rgba(240, 227, 189, .8); }
 <canvas id="sandwind" aria-hidden="true"></canvas>
 
 <header class="hero">
-  <div class="hero__bg"></div>
+  <img class="hero__bg" src="assets/desert-organ-city.webp" alt=""
+       fetchpriority="high" decoding="async" width="2400" height="1346">
   <div class="hero__veil"></div>
   <div class="hero__copy">
     <div class="hero__eyebrow">the dust arrives before the traveler</div>
