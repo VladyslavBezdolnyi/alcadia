@@ -1,46 +1,19 @@
-# Pinterest Board Backup
+---
+name: pinterest
+description: Personal single-user Pinterest board backup — a Python script that pulls the largest image of every pin on my own boards via API v5 to local disk; the repo also hosts the unrelated trip dancer landing page on GitHub Pages (repo alcadia).
+---
 
-A personal, single-user tool that downloads images from my own Pinterest boards
-to my own computer for offline backup.
+# pinterest
 
-It uses the Pinterest API v5 with the `boards:read` and `pins:read` scopes to
-list the boards on my account, read the pins on those boards, and save the
-largest available image variant of each pin to local disk.
+## Map
 
-There is no server, no database, and no third party. Nothing leaves the machine
-it runs on. See [PRIVACY.md](PRIVACY.md).
+### In the repo
+- `download_pins.py` — the backup tool; run by hand with `PINTEREST_TOKEN` set.
+- `downloads/` — backup output, `<board name>/<pin id>.jpg`; gitignored.
+- `PRIVACY.md` — privacy policy for the Pinterest developer app.
+- `index.html` — trip dancer landing page, unrelated to the backup tool; served by GitHub Pages (`.nojekyll` disables Jekyll).
+- `assets/` — the landing page's WebP images, generated from `webpage-assets/` with `cwebp`.
+- `webpage-assets/` — original PNG sources for `assets/`; gitignored, exists only on this machine.
 
-## Usage
-
-```bash
-pip install requests
-export PINTEREST_TOKEN='...'    # from developers.pinterest.com -> your app
-python3 download_pins.py
-```
-
-Images are written to `downloads/<board name>/<pin id>.jpg`. Re-running skips
-files that already exist, so an interrupted run simply resumes.
-
-## Landing page
-
-`index.html` is an unrelated static page — the *trip dancer* landing page —
-served from this repo via GitHub Pages. It is self-contained: no build step, no
-framework, no external requests except the Google Fonts stylesheet.
-
-Its images live in `assets/` as WebP, converted from the originals in
-`webpage-assets/` (kept out of git — see `.gitignore`). To regenerate them:
-
-```bash
-cwebp -q 90 -resize 2400 0 webpage-assets/<hero>.png -o assets/desert-organ-city.webp
-cwebp -q 82 -alpha_q 90 webpage-assets/<cutout>.png  -o assets/<name>.webp
-```
-
-The `og:image` meta tag holds an absolute URL; update it if the site moves to a
-custom domain.
-
-## Notes
-
-- Secret boards additionally require the `boards:read_secret` and
-  `pins:read_secret` scopes.
-- Trial access tokens generated from the app dashboard expire after 24 hours.
-- Video pins are skipped.
+### Docs
+- `docs/how-it-works.md` — which API scopes the backup uses, why nothing leaves the machine, and what the landing page depends on.
